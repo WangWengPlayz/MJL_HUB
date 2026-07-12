@@ -1,5 +1,8 @@
 {% extends "base.html" %}
 {% block title %}{{ script.name }} &middot; {{ site_name }}{% endblock %}
+{% block back %}
+<a class="back-link" href="/#scripts">&larr; Back to scripts</a>
+{% endblock %}
 {% block content %}
 <section class="script-detail">
   <div class="detail-header">
@@ -10,7 +13,6 @@
       {% if script.tags %}<div class="card-tags">{% for t in script.tags %}<span class="tag">{{ t }}</span>{% endfor %}</div>{% endif %}
     </div>
     <div class="detail-actions">
-      <a class="btn" href="{{ script.raw_url }}" download>Download</a>
       <a class="btn" href="{{ script.raw_url }}" target="_blank" rel="noopener">Raw</a>
       <a class="btn" href="{{ script.api_url }}" target="_blank" rel="noopener">API</a>
       <button class="btn" id="share-btn">Share</button>
@@ -28,8 +30,6 @@
     <label class="checkbox"><input type="checkbox" id="wrap-toggle"> Word wrap</label>
     <button class="btn btn-sm" id="theme-toggle">Light mode</button>
     <button class="btn btn-sm" id="fullscreen-btn">Fullscreen</button>
-    <button class="btn btn-sm" id="copy-source-btn">Copy code</button>
-    <a class="btn btn-sm" href="{{ script.raw_url }}" download>Download</a>
   </div>
   <div id="viewer" class="code-viewer">
     <pre id="code-pre"><code id="code-block" class="language-lua"></code></pre>

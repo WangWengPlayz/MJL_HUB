@@ -1,4 +1,35 @@
 // Shared helpers: toast notifications, clipboard copy, live global search.
+
+// Block manual text selection/copy (via keyboard, context menu, or drag
+// selection) everywhere except real form fields -- use the dedicated Copy
+// buttons instead. This is a UX deterrent, not a real security boundary.
+function isFormField(el) {
+  return !!el && (el.tagName === "INPUT" || el.tagName === "TEXTAREA" || el.isContentEditable);
+}
+document.addEventListener("copy", (e) => {
+  if (!isFormField(e.target)) e.preventDefault();
+});
+document.addEventListener("cut", (e) => {
+  if (!isFormField(e.target)) e.preventDefault();
+});
+document.addEventListener("contextmenu", (e) => {
+  if (!isFormField(e.target)) e.preventDefault();
+});
+document.addEventListener("selectstart", (e) => {
+  if (!isFormField(e.target)) e.preventDefault();
+});
+document.addEventListener(
+  "gesturestart",
+  (e) => e.preventDefault(),
+  { passive: false }
+);
+document.addEventListener(
+  "dblclick",
+  (e) => {
+    if (!isFormField(e.target)) e.preventDefault();
+  },
+  { passive: false }
+);
 function showToast(message, isError) {
   const el = document.getElementById("toast");
   if (!el) return;

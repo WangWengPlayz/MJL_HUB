@@ -109,11 +109,6 @@
     }
   });
 
-  document.getElementById("copy-source-btn")?.addEventListener("click", async () => {
-    await copyText(sourceText);
-    showToast("Source copied to clipboard");
-  });
-
   document.getElementById("share-btn")?.addEventListener("click", () => {
     document.getElementById("share-links")?.classList.toggle("hidden");
   });

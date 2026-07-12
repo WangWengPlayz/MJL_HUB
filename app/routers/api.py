@@ -5,7 +5,7 @@ import shutil
 import time
 
 from fastapi import APIRouter, Request
-from fastapi.responses import FileResponse, JSONResponse, PlainTextResponse
+from fastapi.responses import JSONResponse, PlainTextResponse, Response
 
 from app.activity_log import log_security
 from app.config import SCRIPTS_DIR
@@ -105,4 +105,12 @@ def raw_script(request: Request, filename: str):
     if not path.exists() or not path.is_file():
         return PlainTextResponse("Not found", status_code=404)
     index.bump(path.stem, "downloads")
-    return FileResponse(path, media_type="application/javascript; charset=utf-8", filename=filename)
+    # Serve inline as plain text (like any other API/raw output) -- no
+    # Content-Disposition: attachment, so the browser displays it instead of
+    # triggering a file download.
+    content = path.read_text(encoding="utf-8", errors="replace")
+    return Response(
+        content=content,
+        media_type="text/plain; charset=utf-8",
+        headers={"Content-Disposition": "inline"},
+    )
