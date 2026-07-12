@@ -21,13 +21,17 @@ from app.security import SecurityHeadersMiddleware, limiter
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    generated_password = ensure_bootstrap_admin()
-    if generated_password:
+    bootstrap_creds = ensure_bootstrap_admin()
+    if bootstrap_creds:
+        username, password = bootstrap_creds
         print("=" * 60)
-        print(f"MJL HUB: created bootstrap admin account 'admin'")
-        print(f"MJL HUB: generated password: {generated_password}")
-        print("Log in at /login and change this password immediately.")
+        print("MJL HUB: no admin account existed, created one automatically.")
+        print(f"MJL HUB: username: {username}")
+        print(f"MJL HUB: password: {password}")
+        print("This is shown only once and is not stored in plaintext anywhere.")
+        print("Log in at /login, then change the password from the Admin dashboard.")
         print("=" * 60)
+        log_security("bootstrap_admin_created", detail=f"username={username}")
     index.start_watcher()
     yield
     index.stop_watcher()

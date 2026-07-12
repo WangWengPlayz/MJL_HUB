@@ -39,15 +39,19 @@ ACTIVITY_LOG_FILE = LOGS_DIR / "activity.log"
 SECURITY_LOG_FILE = LOGS_DIR / "security.log"
 
 SITE_NAME = "MJL HUB"
+SITE_VERSION = "v1.0"
 
 # Session signing secret. Falls back to a random ephemeral secret so the app
 # never fails to boot, but sessions will not survive a restart unless
 # SESSION_SECRET is set.
 SESSION_SECRET = os.environ.get("SESSION_SECRET") or secrets.token_hex(32)
 
-# Bootstrap admin credentials (only used to seed data/users.json on first run).
-BOOTSTRAP_ADMIN_USERNAME = os.environ.get("ADMIN_USERNAME", "admin")
-BOOTSTRAP_ADMIN_PASSWORD = os.environ.get("ADMIN_PASSWORD")
+# Bootstrap admin credentials are intentionally NOT read from environment
+# variables. On first run (no data/users.json yet), a random username and a
+# strong random password are generated in-process, hashed with bcrypt, and
+# written straight to data/users.json -- the plaintext is shown exactly once
+# in the server console/security log so an operator can log in and is never
+# stored anywhere in plaintext afterwards. See auth.ensure_bootstrap_admin().
 
 SESSION_COOKIE_NAME = "mjlhub_session"
 SESSION_MAX_AGE = 12 * 60 * 60  # 12 hours

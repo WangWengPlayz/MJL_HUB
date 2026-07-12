@@ -5,13 +5,14 @@ from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from app.config import BASE_DIR, SITE_NAME
+from app.config import BASE_DIR, SITE_NAME, SITE_VERSION
 from app.deps import get_current_admin
 from app.schemas import script_to_dict
 from app.scripts_index import index
 
 router = APIRouter()
 templates = Jinja2Templates(directory=str(BASE_DIR / "app" / "templates"))
+templates.env.globals["site_version"] = SITE_VERSION
 
 
 @router.get("/", response_class=HTMLResponse)

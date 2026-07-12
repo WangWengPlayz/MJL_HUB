@@ -17,13 +17,7 @@ from typing import Optional
 import bcrypt
 from itsdangerous import BadSignature, SignatureExpired, URLSafeTimedSerializer
 
-from app.config import (
-    BOOTSTRAP_ADMIN_PASSWORD,
-    BOOTSTRAP_ADMIN_USERNAME,
-    SESSION_MAX_AGE,
-    SESSION_SECRET,
-    USERS_FILE,
-)
+from app.config import SESSION_MAX_AGE, SESSION_SECRET, USERS_FILE
 
 _serializer = URLSafeTimedSerializer(SESSION_SECRET, salt="mjlhub-session")
 
@@ -64,25 +58,30 @@ def _save_users(data: dict) -> None:
         tmp.replace(USERS_FILE)
 
 
-def ensure_bootstrap_admin() -> Optional[str]:
+def ensure_bootstrap_admin() -> Optional[tuple[str, str]]:
     """Create the first admin account if none exists yet.
 
-    Returns a plaintext generated password if one had to be auto-generated,
-    so it can be surfaced to the operator exactly once.
+    Credentials are never read from environment variables or hardcoded --
+    both the username and password are generated randomly in-process, hashed
+    with bcrypt, and persisted only as that hash in data/users.json. The
+    plaintext pair is returned once so the caller can surface it to the
+    operator (console + security log) a single time; it is never stored or
+    logged anywhere afterward.
     """
     data = _load_users()
     if data.get("users"):
         return None
-    password = BOOTSTRAP_ADMIN_PASSWORD or secrets.token_urlsafe(12)
+    username = f"admin_{secrets.token_hex(4)}"
+    password = secrets.token_urlsafe(15)
     data["users"] = [
         {
-            "username": BOOTSTRAP_ADMIN_USERNAME,
+            "username": username,
             "password_hash": pwd_context.hash(password),
             "created_at": time.time(),
         }
     ]
     _save_users(data)
-    return None if BOOTSTRAP_ADMIN_PASSWORD else password
+    return username, password
 
 
 def list_users() -> list[dict]:

@@ -64,9 +64,11 @@ code { font-family: "JetBrains Mono", "Fira Code", Consolas, monospace; }
   top: 0;
   z-index: 20;
 }
-.brand { display: flex; align-items: center; gap: .5rem; font-size: 1.15rem; font-weight: 600; }
+.brand { display: flex; align-items: center; gap: .5rem; font-size: 1.15rem; font-weight: 600; flex: 0 0 auto; }
 .brand-mark { color: var(--accent); }
 .brand strong { color: var(--accent-2); }
+.version-tag { font-size: .65rem; font-weight: 500; color: var(--muted); border: 1px solid var(--border); border-radius: 999px; padding: .1rem .5rem; margin-left: .15rem; }
+.version-badge { display: inline-block; background: var(--bg-alt); border: 1px solid var(--border); border-radius: 999px; padding: .15rem .6rem; font-size: .72rem; margin-left: .6rem; }
 .nav-search { position: relative; flex: 1; max-width: 420px; }
 .nav-search input {
   width: 100%; padding: .55rem .9rem; border-radius: 999px; border: 1px solid var(--border);
@@ -200,11 +202,67 @@ mark.hl { background: rgba(255, 214, 0, .35); border-radius: 2px; }
 .modal-card input { width: 100%; background: var(--bg-alt); border: 1px solid var(--border); color: var(--text); padding: .55rem .7rem; border-radius: 8px; margin: .5rem 0; }
 .modal-actions { display: flex; justify-content: flex-end; gap: .6rem; margin-top: 1rem; }
 
-footer { text-align: center; padding: 1.5rem; color: var(--muted); font-size: .8rem; border-top: 1px solid var(--border); }
+footer { text-align: center; padding: 1.5rem; color: var(--muted); font-size: .8rem; border-top: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: .4rem; }
 
 .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: .6rem 1.1rem; border-radius: 999px; font-size: .85rem; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.3); }
 
+/* ---- Responsive: tablet / small desktop ---- */
+@media (max-width: 1024px) {
+  main { padding: 1.5rem 1.25rem 3rem; }
+  .row-groups { grid-template-columns: repeat(2, 1fr); }
+  .script-grid { grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); }
+}
+
+/* ---- Responsive: mobile / narrow tablets ---- */
 @media (max-width: 860px) {
   .row-groups { grid-template-columns: 1fr; }
-  .topbar { flex-wrap: wrap; }
+  .topbar { flex-wrap: wrap; gap: .75rem; padding: .85rem 1.1rem; }
+  .nav-search { order: 3; flex: 1 1 100%; max-width: none; }
+  .hero h1 { font-size: 2.2rem; }
+  .hero-stats { gap: 1.5rem; }
+  .admin-tabs { overflow-x: auto; flex-wrap: nowrap; -webkit-overflow-scrolling: touch; }
+  .admin-table { display: block; overflow-x: auto; white-space: nowrap; }
+  .modal-card { padding: 1.1rem; }
+}
+
+/* ---- Responsive: phones ---- */
+@media (max-width: 600px) {
+  main { padding: 1.25rem 1rem 3rem; }
+  .topbar { padding: .75rem .9rem; gap: .6rem; }
+  .brand { font-size: 1rem; }
+  .version-tag { display: none; }
+  .nav-links { gap: .9rem; font-size: .85rem; }
+  .hero { padding: 2rem .5rem 1.5rem; }
+  .hero h1 { font-size: 1.7rem; letter-spacing: -.5px; }
+  .tagline { font-size: .9rem; }
+  .hero-stats { gap: 1.1rem; }
+  .stat-value { font-size: 1.3rem; }
+  .script-grid { grid-template-columns: 1fr; }
+  .scripts-toolbar { flex-direction: column; align-items: stretch; gap: .6rem; }
+  .scripts-toolbar select, #sort-select { width: 100%; }
+  .detail-header { flex-direction: column; align-items: stretch; }
+  .detail-actions { width: 100%; }
+  .detail-actions .btn { flex: 1 1 auto; justify-content: center; }
+  .loader-box { padding: .5rem .6rem; }
+  .loader-box code { font-size: .72rem; }
+  .viewer-toolbar { flex-direction: column; align-items: stretch; gap: .55rem; }
+  .viewer-toolbar input[type="search"] { width: 100%; }
+  .code-viewer { max-height: 55vh; }
+  #code-pre { font-size: .78rem; padding: .85rem; }
+  .admin-header { flex-direction: column; align-items: flex-start; gap: .5rem; }
+  .admin-toolbar { flex-direction: column; }
+  .inline-form { flex-direction: column; align-items: stretch; }
+  .inline-form input, .inline-form button { width: 100%; }
+  .modal-card { width: 94vw; padding: 1rem; }
+  .modal-card textarea { height: 40vh; }
+  .stat-grid { grid-template-columns: repeat(2, 1fr); }
+  .qr-panel { width: 100%; }
+  .footer, footer { padding: 1.1rem .8rem; font-size: .75rem; }
+}
+
+/* ---- Responsive: large desktop -- keep content comfortably centered
+   and give the code viewer more room to breathe on wide monitors ---- */
+@media (min-width: 1440px) {
+  main { max-width: 1360px; }
+  .code-viewer { max-height: 76vh; }
 }
