@@ -1,0 +1,1 @@
+- [FastAPI/Starlette + passlib/bcrypt gotchas](fastapi-starlette-gotchas.md) — version quirks that break silently: TemplateResponse arg order, passlib+bcrypt5 crash.

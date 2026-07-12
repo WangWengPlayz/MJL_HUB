@@ -1,0 +1,97 @@
+{% extends "base.html" %}
+{% block title %}Admin Dashboard &middot; {{ site_name }}{% endblock %}
+{% block content %}
+<div id="admin-root" data-csrf="{{ csrf }}" data-username="{{ username }}">
+<section class="admin-header">
+  <div>
+    <h1>Admin Dashboard</h1>
+    <p class="muted">Signed in as <strong>{{ username }}</strong></p>
+  </div>
+  <button class="btn" id="logout-btn">Log out</button>
+</section>
+
+<nav class="admin-tabs">
+  <button class="tab-btn active" data-tab="overview">Overview</button>
+  <button class="tab-btn" data-tab="scripts">Scripts</button>
+  <button class="tab-btn" data-tab="upload">Upload</button>
+  <button class="tab-btn" data-tab="logs">Activity Logs</button>
+  <button class="tab-btn" data-tab="users">Users</button>
+  <button class="tab-btn" data-tab="account">Account</button>
+</nav>
+
+<section class="tab-panel active" data-panel="overview">
+  <div id="admin-stats" class="stat-grid"></div>
+</section>
+
+<section class="tab-panel" data-panel="scripts">
+  <div class="admin-toolbar">
+    <input type="search" id="admin-search" placeholder="Filter scripts...">
+    <button class="btn btn-danger" id="bulk-delete-btn">Delete selected</button>
+  </div>
+  <table class="admin-table" id="admin-table">
+    <thead><tr><th><input type="checkbox" id="select-all"></th><th>Name</th><th>Filename</th><th>Size</th><th>Updated</th><th>Actions</th></tr></thead>
+    <tbody id="admin-table-body"></tbody>
+  </table>
+</section>
+
+<section class="tab-panel" data-panel="upload">
+  <div class="upload-zone" id="drop-zone">
+    <p>Drag &amp; drop <code>.js</code> files here, or</p>
+    <input type="file" id="file-input" accept=".js" multiple>
+  </div>
+  <div id="upload-results" class="upload-results"></div>
+</section>
+
+<section class="tab-panel" data-panel="logs">
+  <div class="logs-toolbar">
+    <button class="btn btn-sm active" data-log="activity">Activity</button>
+    <button class="btn btn-sm" data-log="security">Security</button>
+  </div>
+  <pre id="logs-view" class="logs-view"></pre>
+</section>
+
+<section class="tab-panel" data-panel="users">
+  <form id="add-user-form" class="inline-form">
+    <input type="text" name="username" placeholder="New admin username" required>
+    <input type="password" name="password" placeholder="Password (min 8 chars)" required minlength="8">
+    <button class="btn btn-primary" type="submit">Add admin</button>
+  </form>
+  <table class="admin-table">
+    <thead><tr><th>Username</th><th>Created</th><th></th></tr></thead>
+    <tbody id="users-table-body"></tbody>
+  </table>
+</section>
+
+<section class="tab-panel" data-panel="account">
+  <form id="change-password-form" class="inline-form">
+    <input type="password" name="new_password" placeholder="New password (min 8 chars)" required minlength="8">
+    <button class="btn btn-primary" type="submit">Change my password</button>
+  </form>
+</section>
+
+<div id="edit-modal" class="modal hidden">
+  <div class="modal-card">
+    <h2 id="edit-modal-title">Edit source</h2>
+    <textarea id="edit-textarea" spellcheck="false"></textarea>
+    <div class="modal-actions">
+      <button class="btn" id="edit-cancel">Cancel</button>
+      <button class="btn btn-primary" id="edit-save">Save</button>
+    </div>
+  </div>
+</div>
+
+<div id="rename-modal" class="modal hidden">
+  <div class="modal-card modal-card-sm">
+    <h2>Rename script</h2>
+    <input type="text" id="rename-input" placeholder="new-name.js">
+    <div class="modal-actions">
+      <button class="btn" id="rename-cancel">Cancel</button>
+      <button class="btn btn-primary" id="rename-save">Save</button>
+    </div>
+  </div>
+</div>
+</div>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/admin.js"></script>
+{% endblock %}

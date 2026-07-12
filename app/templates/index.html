@@ -1,0 +1,82 @@
+{% extends "base.html" %}
+{% block content %}
+<section class="hero">
+  <h1>MJL <span class="accent">HUB</span></h1>
+  <p class="tagline">Fully automated script hosting. Every file in <code>/script/</code> is live the moment it lands &mdash; no manual work, ever.</p>
+  <div class="hero-stats" id="hero-stats">
+    <div class="stat"><span class="stat-value">{{ total }}</span><span class="stat-label">Scripts</span></div>
+    <div class="stat" data-stat="uptime"><span class="stat-value">&mdash;</span><span class="stat-label">Uptime</span></div>
+    <div class="stat" data-stat="storage"><span class="stat-value">&mdash;</span><span class="stat-label">Storage used</span></div>
+    <div class="stat" data-stat="scan"><span class="stat-value">&mdash;</span><span class="stat-label">Last scan</span></div>
+  </div>
+</section>
+
+<section class="row-groups">
+  <div class="group">
+    <h2>Newest scripts</h2>
+    <div class="chip-row">
+      {% for s in newest %}<a class="chip" href="/scripts/{{ s.name }}">{{ s.name }}</a>{% else %}<span class="muted">Nothing yet.</span>{% endfor %}
+    </div>
+  </div>
+  <div class="group">
+    <h2>Recently modified</h2>
+    <div class="chip-row">
+      {% for s in recent %}<a class="chip" href="/scripts/{{ s.name }}">{{ s.name }}</a>{% else %}<span class="muted">Nothing yet.</span>{% endfor %}
+    </div>
+  </div>
+  <div class="group">
+    <h2>Popular</h2>
+    <div class="chip-row">
+      {% for s in popular %}<a class="chip" href="/scripts/{{ s.name }}">{{ s.name }}</a>{% else %}<span class="muted">Nothing yet.</span>{% endfor %}
+    </div>
+  </div>
+</section>
+
+{% if tags %}
+<section class="tags-bar">
+  <span class="muted">Categories:</span>
+  {% for t in tags %}<button class="tag-btn" data-tag="{{ t }}">{{ t }}</button>{% endfor %}
+  <button class="tag-btn" data-tag="">All</button>
+</section>
+{% endif %}
+
+<section id="scripts" class="scripts-section">
+  <div class="scripts-toolbar">
+    <h2>All scripts (<span id="script-count">{{ total }}</span>)</h2>
+    <select id="sort-select">
+      <option value="name">Alphabetical</option>
+      <option value="newest">Newest</option>
+      <option value="updated">Recently updated</option>
+      <option value="popular">Popular</option>
+    </select>
+  </div>
+  <div id="script-grid" class="script-grid">
+    {% for s in scripts %}
+    <article class="card" data-name="{{ s.name|lower }}" data-tags="{{ s.tags|join(',')|lower }}">
+      <div class="card-head">
+        <h3><a href="/scripts/{{ s.name }}">{{ s.name }}</a></h3>
+        <span class="badge">v{{ s.checksum[:6] }}</span>
+      </div>
+      <p class="card-meta">Updated {{ s.updated_at }} UTC &middot; {{ s.size_bytes }} bytes</p>
+      {% if s.tags %}<div class="card-tags">{% for t in s.tags %}<span class="tag">{{ t }}</span>{% endfor %}</div>{% endif %}
+      <div class="loader-box">
+        <code>{{ s.loader }}</code>
+        <button class="copy-btn" data-copy="{{ s.loader }}" title="Copy loader">Copy</button>
+      </div>
+      <div class="card-actions">
+        <button class="btn btn-primary btn-sm copy-btn" data-copy="{{ s.loader }}">Copy Loader</button>
+        <a class="btn btn-sm" href="/scripts/{{ s.name }}">View Source</a>
+        <a class="btn btn-sm" href="{{ s.raw_url }}" download>Download</a>
+      </div>
+    </article>
+    {% else %}
+    <div class="empty-state">
+      <p>No scripts yet. Drop a <code>.js</code> file into <code>/script/</code> and refresh &mdash; MJL HUB will pick it up automatically.</p>
+    </div>
+    {% endfor %}
+  </div>
+</section>
+{% endblock %}
+{% block scripts %}
+<script src="/static/js/home.js"></script>
+{% endblock %}
