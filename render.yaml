@@ -11,12 +11,12 @@ services:
     envVars:
       - key: SESSION_SECRET
         generateValue: true
-      - key: ADMIN_USERNAME
-        value: admin
-      - key: ADMIN_PASSWORD
-        sync: false
       - key: PUBLIC_BASE_URL
         sync: false
+    # NOTE: admin credentials are no longer set via env vars. On first boot
+    # with an empty data/users.json, the app generates a random admin
+    # username + password itself, hashes it, and prints the plaintext once
+    # to the service logs (Render dashboard -> Logs) for you to capture.
     disk:
       name: mjl-hub-data
       mountPath: /opt/render/project/src/script

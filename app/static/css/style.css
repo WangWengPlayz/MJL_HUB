@@ -248,6 +248,9 @@ mark.hl { background: rgba(255, 214, 0, .35); border-radius: 2px; }
 .modal-actions { display: flex; justify-content: flex-end; gap: .6rem; margin-top: 1rem; }
 
 footer { text-align: center; padding: 1.5rem; color: var(--muted); font-size: .8rem; border-top: 1px solid var(--border); display: flex; flex-direction: column; align-items: center; gap: .4rem; }
+.footer-credit { font-size: .75rem; color: var(--muted); }
+.footer-credit a { color: var(--accent-2); text-decoration: underline; text-underline-offset: 2px; }
+.footer-credit a:hover { color: var(--accent); }
 
 .toast { position: fixed; bottom: 1.5rem; left: 50%; transform: translateX(-50%); background: var(--accent); color: #fff; padding: .6rem 1.1rem; border-radius: 999px; font-size: .85rem; z-index: 200; box-shadow: 0 8px 24px rgba(0,0,0,.3); }
 
