@@ -52,33 +52,5 @@ document.querySelectorAll(".tag-btn").forEach((btn) => {
   });
 });
 
-document.getElementById("sort-select")?.addEventListener("change", async (e) => {
-  try {
-    const res = await fetch(`/api/scripts?sort=${e.target.value}`);
-    const data = await res.json();
-    const grid = document.getElementById("script-grid");
-    if (!grid || !data.scripts) return;
-    grid.innerHTML = data.scripts
-      .map(
-        (s) => `
-      <article class="card" data-name="${s.name.toLowerCase()}" data-tags="${s.tags.join(",").toLowerCase()}">
-        <div class="card-head"><h3><a href="/scripts/${encodeURIComponent(s.name)}">${s.name}</a></h3><span class="badge">v${s.checksum.slice(0, 6)}</span></div>
-        <p class="card-meta">Updated ${s.updated_at} UTC &middot; ${s.size_bytes} bytes</p>
-        ${s.tags.length ? `<div class="card-tags">${s.tags.map((t) => `<span class="tag">${t}</span>`).join("")}</div>` : ""}
-        <div class="loader-box"><code>${s.loader}</code><button class="copy-btn" data-copy="${s.loader.replace(/"/g, "&quot;")}">Copy</button></div>
-        <div class="card-actions">
-          <button class="btn btn-primary btn-sm copy-btn" data-copy="${s.loader.replace(/"/g, "&quot;")}">Copy Loader</button>
-          <a class="btn btn-sm" href="/scripts/${encodeURIComponent(s.name)}">View Source</a>
-          <a class="btn btn-sm" href="${s.raw_url}" download>Download</a>
-        </div>
-      </article>`
-      )
-      .join("");
-    document.getElementById("script-count").textContent = data.count;
-  } catch (err) {
-    /* ignore */
-  }
-});
-
 loadStats();
 setInterval(loadStats, 15000);

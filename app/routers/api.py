@@ -22,10 +22,7 @@ def api_scripts(request: Request, sort: str = "name"):
     entries = index.all()
     key_fns = {
         "name": lambda e: e.name.lower(),
-        "newest": lambda e: -e.created_at,
         "updated": lambda e: -e.updated_at,
-        "popular": lambda e: -(e.views + e.downloads),
-        "size": lambda e: -e.size,
     }
     entries.sort(key=key_fns.get(sort, key_fns["name"]))
     return {"count": len(entries), "scripts": [script_to_dict(e, request) for e in entries]}

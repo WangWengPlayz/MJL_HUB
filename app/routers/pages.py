@@ -17,10 +17,7 @@ templates.env.globals["site_version"] = SITE_VERSION
 
 @router.get("/", response_class=HTMLResponse)
 def homepage(request: Request):
-    entries = index.all()
-    newest = sorted(entries, key=lambda e: -e.created_at)[:6]
-    recent = sorted(entries, key=lambda e: -e.updated_at)[:6]
-    popular = sorted(entries, key=lambda e: -(e.views + e.downloads))[:6]
+    entries = sorted(index.all(), key=lambda e: e.name.lower())
     tags = sorted({t for e in entries for t in e.tags})
     return templates.TemplateResponse(
         request,
@@ -28,9 +25,6 @@ def homepage(request: Request):
         {
             "site_name": SITE_NAME,
             "scripts": [script_to_dict(e, request) for e in entries],
-            "newest": [script_to_dict(e, request) for e in newest],
-            "recent": [script_to_dict(e, request) for e in recent],
-            "popular": [script_to_dict(e, request) for e in popular],
             "tags": tags,
             "total": len(entries),
         },

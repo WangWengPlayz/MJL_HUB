@@ -13,27 +13,6 @@
   </div>
 </section>
 
-<section class="row-groups">
-  <div class="group">
-    <h2>Newest scripts</h2>
-    <div class="chip-row">
-      {% for s in newest %}<a class="chip" href="/scripts/{{ s.name }}">{{ s.name }}</a>{% else %}<span class="muted">Nothing yet.</span>{% endfor %}
-    </div>
-  </div>
-  <div class="group">
-    <h2>Recently modified</h2>
-    <div class="chip-row">
-      {% for s in recent %}<a class="chip" href="/scripts/{{ s.name }}">{{ s.name }}</a>{% else %}<span class="muted">Nothing yet.</span>{% endfor %}
-    </div>
-  </div>
-  <div class="group">
-    <h2>Popular</h2>
-    <div class="chip-row">
-      {% for s in popular %}<a class="chip" href="/scripts/{{ s.name }}">{{ s.name }}</a>{% else %}<span class="muted">Nothing yet.</span>{% endfor %}
-    </div>
-  </div>
-</section>
-
 {% if tags %}
 <section class="tags-bar">
   <span class="muted">Categories:</span>
@@ -45,12 +24,7 @@
 <section id="scripts" class="scripts-section">
   <div class="scripts-toolbar">
     <h2>All scripts (<span id="script-count">{{ total }}</span>)</h2>
-    <select id="sort-select">
-      <option value="name">Alphabetical</option>
-      <option value="newest">Newest</option>
-      <option value="updated">Recently updated</option>
-      <option value="popular">Popular</option>
-    </select>
+    <span class="sort-label">Alphabetical</span>
   </div>
   <div id="script-grid" class="script-grid">
     {% for s in scripts %}
