@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
 <section class="hero">
+  <div class="hero-glow" aria-hidden="true"></div>
+  <p class="hero-prompt"><span class="prompt-caret">&gt;</span> loadstring(game:HttpGet(...))()<span class="cursor-blink">_</span></p>
   <h1>MJL <span class="accent">HUB</span></h1>
   <p class="tagline">Fully automated script hosting. Every file in <code>/script/</code> is live the moment it lands &mdash; no manual work, ever.</p>
   <div class="hero-stats" id="hero-stats">
@@ -53,6 +55,10 @@
   <div id="script-grid" class="script-grid">
     {% for s in scripts %}
     <article class="card" data-name="{{ s.name|lower }}" data-tags="{{ s.tags|join(',')|lower }}">
+      <div class="term-bar">
+        <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
+        <span class="term-path">{{ s.filename }}</span>
+      </div>
       <div class="card-head">
         <h3><a href="/scripts/{{ s.name }}">{{ s.name }}</a></h3>
         <span class="badge">v{{ s.checksum[:6] }}</span>

@@ -28,10 +28,12 @@
     <input type="search" id="admin-search" placeholder="Filter scripts...">
     <button class="btn btn-danger" id="bulk-delete-btn">Delete selected</button>
   </div>
+  <div class="table-scroll">
   <table class="admin-table" id="admin-table">
     <thead><tr><th><input type="checkbox" id="select-all"></th><th>Name</th><th>Filename</th><th>Size</th><th>Updated</th><th>Actions</th></tr></thead>
     <tbody id="admin-table-body"></tbody>
   </table>
+  </div>
 </section>
 
 <section class="tab-panel" data-panel="upload">
@@ -56,10 +58,12 @@
     <input type="password" name="password" placeholder="Password (min 8 chars)" required minlength="8">
     <button class="btn btn-primary" type="submit">Add admin</button>
   </form>
+  <div class="table-scroll">
   <table class="admin-table">
     <thead><tr><th>Username</th><th>Created</th><th></th></tr></thead>
     <tbody id="users-table-body"></tbody>
   </table>
+  </div>
 </section>
 
 <section class="tab-panel" data-panel="account">
