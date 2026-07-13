@@ -23,16 +23,21 @@ if ON_VERCEL:
     SCRIPTS_DIR = _runtime_root / "script"
     DATA_DIR = _runtime_root / "data"
     LOGS_DIR = _runtime_root / "logs"
+    INFO_DIR = _runtime_root / "info"
     if not SCRIPTS_DIR.exists():
         _shutil.copytree(BASE_DIR / "script", SCRIPTS_DIR, dirs_exist_ok=True)
+    if not INFO_DIR.exists() and (BASE_DIR / "info").exists():
+        _shutil.copytree(BASE_DIR / "info", INFO_DIR, dirs_exist_ok=True)
 else:
     SCRIPTS_DIR = BASE_DIR / "script"
     DATA_DIR = BASE_DIR / "data"
     LOGS_DIR = BASE_DIR / "logs"
+    INFO_DIR = BASE_DIR / "info"
 
 SCRIPTS_DIR.mkdir(parents=True, exist_ok=True)
 DATA_DIR.mkdir(parents=True, exist_ok=True)
 LOGS_DIR.mkdir(parents=True, exist_ok=True)
+INFO_DIR.mkdir(parents=True, exist_ok=True)
 
 USERS_FILE = DATA_DIR / "users.json"
 ACTIVITY_LOG_FILE = LOGS_DIR / "activity.log"

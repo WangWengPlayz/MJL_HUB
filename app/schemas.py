@@ -4,6 +4,7 @@ from __future__ import annotations
 from datetime import datetime, timezone
 
 from app.config import PUBLIC_BASE_URL
+from app.info_store import get_info
 from app.scripts_index import ScriptEntry
 
 
@@ -26,6 +27,7 @@ def loader_snippet(name: str, filename: str, request=None) -> str:
 
 def script_to_dict(entry: ScriptEntry, request=None) -> dict:
     root = base_url(request)
+    info = get_info(entry.name, fallback_updated_at=entry.updated_at)
     return {
         "name": entry.name,
         "filename": entry.filename,
@@ -41,4 +43,10 @@ def script_to_dict(entry: ScriptEntry, request=None) -> dict:
         "raw_url": f"{root}/script/{entry.filename}",
         "api_url": f"{root}/api/script/{entry.name}",
         "loader": loader_snippet(entry.name, entry.filename, request),
+        "title": info["title"],
+        "description": info["description"],
+        "version": info["version"],
+        "creator": info["creator"],
+        "credits": info["credits"],
+        "last_updated": info["lastUpdated"],
     }

@@ -34,10 +34,16 @@
         <span class="term-path">{{ s.filename }}</span>
       </div>
       <div class="card-head">
-        <h3><a href="/scripts/{{ s.name }}">{{ s.name }}</a></h3>
-        <span class="badge">v{{ s.checksum[:6] }}</span>
+        <h3><a href="/scripts/{{ s.name }}">{{ s.title }}</a></h3>
+        <span class="badge badge-version">v{{ s.version }}</span>
       </div>
-      <p class="card-meta">Updated {{ s.updated_at }} UTC &middot; {{ s.size_bytes }} bytes</p>
+      {% if s.description %}<p class="card-desc">{{ s.description }}</p>{% endif %}
+      <p class="card-meta">Updated {{ s.last_updated }} &middot; {{ s.size_bytes }} bytes</p>
+      {% if s.creator or s.credits %}
+      <p class="card-credit">
+        {% if s.creator %}By <strong>{{ s.creator }}</strong>{% endif %}{% if s.creator and s.credits %} &middot; {% endif %}{% if s.credits %}Credits: {{ s.credits }}{% endif %}
+      </p>
+      {% endif %}
       {% if s.tags %}<div class="card-tags">{% for t in s.tags %}<span class="tag">{{ t }}</span>{% endfor %}</div>{% endif %}
       <div class="loader-box">
         <code>{{ s.loader }}</code>

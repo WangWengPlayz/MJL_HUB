@@ -11,10 +11,17 @@
   </div>
   <div class="detail-header">
     <div>
-      <h1>{{ script.name }}</h1>
+      <h1>{{ script.title }}</h1>
+      {% if script.description %}<p class="detail-desc">{{ script.description }}</p>{% endif %}
       <p class="muted">{{ script.filename }} &middot; {{ script.size_bytes }} bytes &middot; {{ script.lines }} lines &middot; checksum {{ script.checksum }}</p>
       <p class="muted">Last updated {{ script.updated_at }} UTC</p>
       {% if script.tags %}<div class="card-tags">{% for t in script.tags %}<span class="tag">{{ t }}</span>{% endfor %}</div>{% endif %}
+      <div class="info-panel">
+        <div class="info-row"><span class="info-label">Version</span><span class="info-value">{{ script.version }}</span></div>
+        {% if script.creator %}<div class="info-row"><span class="info-label">Creator</span><span class="info-value">{{ script.creator }}</span></div>{% endif %}
+        {% if script.credits %}<div class="info-row"><span class="info-label">Credits</span><span class="info-value">{{ script.credits }}</span></div>{% endif %}
+        <div class="info-row"><span class="info-label">Last updated</span><span class="info-value">{{ script.last_updated }}</span></div>
+      </div>
     </div>
     <div class="detail-actions">
       <a class="btn" href="{{ script.raw_url }}" target="_blank" rel="noopener">Raw</a>

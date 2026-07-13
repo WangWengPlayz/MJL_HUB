@@ -156,7 +156,11 @@ main { flex: 1; max-width: 1180px; margin: 0 auto; padding: 2rem 1.5rem 4rem; wi
 .card-head { display: flex; justify-content: space-between; align-items: center; gap: .5rem; min-width: 0; }
 .card-head h3 { margin: 0; font-size: 1.05rem; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .badge { background: var(--bg-alt); border: 1px solid var(--border); color: var(--muted); font-size: .7rem; padding: .15rem .5rem; border-radius: 999px; }
+.badge-version { color: var(--accent-2); border-color: var(--accent-2); flex: 0 0 auto; }
 .card-meta { color: var(--muted); font-size: .78rem; margin: 0; }
+.card-desc { color: var(--text); font-size: .85rem; margin: 0; opacity: .9; overflow-wrap: break-word; }
+.card-credit { color: var(--muted); font-size: .75rem; margin: 0; }
+.card-credit strong { color: var(--text); }
 .card-tags { display: flex; flex-wrap: wrap; gap: .35rem; }
 .tag { background: rgba(124,92,255,.15); color: var(--accent); font-size: .7rem; padding: .15rem .5rem; border-radius: 999px; }
 
@@ -183,6 +187,11 @@ main { flex: 1; max-width: 1180px; margin: 0 auto; padding: 2rem 1.5rem 4rem; wi
 .detail-header { display: flex; justify-content: space-between; flex-wrap: wrap; gap: 1rem; align-items: flex-start; min-width: 0; }
 .detail-header > div { min-width: 0; }
 .detail-header h1 { margin: 0 0 .3rem; overflow-wrap: break-word; word-break: break-word; }
+.detail-desc { color: var(--text); font-size: .95rem; margin: 0 0 .5rem; opacity: .9; max-width: 640px; overflow-wrap: break-word; }
+.info-panel { display: flex; flex-wrap: wrap; gap: .5rem 1.5rem; margin-top: .9rem; padding: .8rem 1rem; background: var(--bg-alt); border: 1px solid var(--border); border-radius: var(--radius); }
+.info-row { display: flex; flex-direction: column; gap: .1rem; min-width: 90px; }
+.info-label { font-size: .68rem; color: var(--muted); text-transform: uppercase; letter-spacing: .04em; }
+.info-value { font-size: .85rem; color: var(--text); font-weight: 500; overflow-wrap: break-word; }
 .detail-actions { display: flex; gap: .5rem; flex-wrap: wrap; }
 .muted { color: var(--muted); font-size: .85rem; margin: .15rem 0; }
 

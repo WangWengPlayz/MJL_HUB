@@ -20,6 +20,7 @@ from watchdog.events import FileSystemEventHandler
 from watchdog.observers import Observer
 
 from app.config import SCRIPTS_DIR
+from app.info_store import ensure_info_stub
 
 FILENAME_RE = re.compile(r"^[A-Za-z0-9_+.\-]{1,100}\.js$")
 TAG_COMMENT_RE = re.compile(r"@tags?:\s*(.+)", re.IGNORECASE)
@@ -125,6 +126,7 @@ class ScriptIndex:
         counters = self._counters.get(name, {"views": 0, "downloads": 0, "copies": 0})
         if prior is not None:
             counters = {"views": prior.views, "downloads": prior.downloads, "copies": prior.copies}
+        ensure_info_stub(name, stat.st_mtime)
         return ScriptEntry(
             filename=path.name,
             name=name,
