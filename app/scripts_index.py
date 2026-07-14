@@ -32,7 +32,11 @@ from app.config import SCRIPTS_DIR
 from app.info_store import ensure_info_stub
 
 FILENAME_RE = re.compile(r"^[A-Za-z0-9_+.\-]{1,100}\.js$")
-FOLDER_NAME_RE = re.compile(r"^[A-Za-z0-9_+.\-]{1,100}$")
+# Grouped-script folder names are used as display names (e.g. "+1 Magic
+# Evolution"), so they're allowed to contain spaces and common punctuation
+# that a flat `name.js` filename can't -- just no path separators or leading/
+# trailing dots that could enable traversal.
+FOLDER_NAME_RE = re.compile(r"^[A-Za-z0-9_+][A-Za-z0-9 _+.,'()\[\]&#!-]{0,99}$")
 MAIN_FILENAME = "main.js"
 SP_RE = re.compile(r"^sp(\d+)\.js$", re.IGNORECASE)
 TAG_COMMENT_RE = re.compile(r"@tags?:\s*(.+)", re.IGNORECASE)

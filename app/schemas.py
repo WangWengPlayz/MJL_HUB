@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 from datetime import datetime, timezone
+from urllib.parse import quote
 
 from app.config import PUBLIC_BASE_URL
 from app.info_store import get_info
@@ -20,8 +21,14 @@ def base_url(request=None) -> str:
     return ""
 
 
+def _url_path(relpath: str) -> str:
+    """Percent-encode each path segment (spaces, etc.) while keeping the
+    "/" separators intact -- folder names may contain spaces/punctuation."""
+    return "/".join(quote(part, safe="") for part in relpath.split("/"))
+
+
 def loader_snippet(name: str, filename: str, request=None) -> str:
-    url = f"{base_url(request)}/script/{filename}"
+    url = f"{base_url(request)}/script/{_url_path(filename)}"
     return f'loadstring(game:HttpGet("{url}"))()'
 
 
@@ -35,7 +42,7 @@ def sub_script_to_dict(entry, folder: str, request=None) -> dict:
         "checksum": entry.checksum,
         "lines": entry.lines,
         "downloads": entry.downloads,
-        "raw_url": f"{root}/script/{entry.filename}",
+        "raw_url": f"{root}/script/{_url_path(entry.filename)}",
         "loader": loader_snippet(folder, entry.filename, request),
     }
 
@@ -55,8 +62,8 @@ def script_to_dict(entry: ScriptEntry, request=None) -> dict:
         "views": entry.views,
         "downloads": entry.downloads,
         "copies": entry.copies,
-        "raw_url": f"{root}/script/{entry.filename}",
-        "api_url": f"{root}/api/script/{entry.name}",
+        "raw_url": f"{root}/script/{_url_path(entry.filename)}",
+        "api_url": f"{root}/api/script/{quote(entry.name, safe='')}",
         "loader": loader_snippet(entry.name, entry.filename, request),
         "title": info["title"],
         "description": info["description"],
