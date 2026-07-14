@@ -7,6 +7,12 @@
     return { "X-CSRF-Token": csrf };
   }
 
+  // Percent-encode each path segment but keep the "/" separators intact,
+  // since our relpath-aware routes expect real slashes, not %2F.
+  function encodeRelPath(relpath) {
+    return relpath.split("/").map(encodeURIComponent).join("/");
+  }
+
   async function api(path, options = {}) {
     const res = await fetch(path, {
       ...options,
@@ -83,23 +89,44 @@
     const q = (document.getElementById("admin-search").value || "").toLowerCase();
     const filtered = allScripts.filter((s) => s.name.toLowerCase().includes(q));
     document.getElementById("admin-table-body").innerHTML = filtered
-      .map(
-        (s) => `
+      .map((s) => {
+        const nameCell = s.is_group ? `${s.name} <span class="badge badge-group">${s.sub_count} SP</span>` : s.name;
+        const renameBtn = s.is_group ? "" : `<button class="btn btn-sm" data-action="rename" data-filename="${s.filename}">Rename</button>`;
+        const mainRow = `
       <tr data-filename="${s.filename}">
         <td><input type="checkbox" class="row-check" value="${s.filename}"></td>
-        <td>${s.name}</td>
+        <td>${nameCell}</td>
         <td>${s.filename}</td>
         <td>${fmtBytes(s.size_bytes)}</td>
         <td>${s.updated_at}</td>
         <td class="row-actions">
           <button class="btn btn-sm" data-action="edit" data-filename="${s.filename}">Edit</button>
-          <button class="btn btn-sm" data-action="rename" data-filename="${s.filename}">Rename</button>
+          ${renameBtn}
           <button class="btn btn-sm" data-action="replace" data-filename="${s.filename}">Replace</button>
           <a class="btn btn-sm" href="/scripts/${encodeURIComponent(s.name)}" target="_blank">View</a>
           <button class="btn btn-sm btn-danger" data-action="delete" data-filename="${s.filename}">Delete</button>
         </td>
+      </tr>`;
+        const subRows = (s.sub_scripts || [])
+          .map(
+            (sp) => `
+      <tr data-filename="${sp.filename}" class="admin-subrow">
+        <td></td>
+        <td class="admin-subname">&#8627; ${sp.label}</td>
+        <td>${sp.filename}</td>
+        <td>${fmtBytes(sp.size_bytes)}</td>
+        <td>&mdash;</td>
+        <td class="row-actions">
+          <button class="btn btn-sm" data-action="edit" data-filename="${sp.filename}">Edit</button>
+          <button class="btn btn-sm" data-action="replace" data-filename="${sp.filename}">Replace</button>
+          <a class="btn btn-sm" href="${sp.raw_url}" target="_blank">Raw</a>
+          <button class="btn btn-sm btn-danger" data-action="delete" data-filename="${sp.filename}">Delete</button>
+        </td>
       </tr>`
-      )
+          )
+          .join("");
+        return mainRow + subRows;
+      })
       .join("");
   }
 
@@ -116,7 +143,7 @@
     if (action === "delete") {
       if (!confirm(`Delete ${filename}? This cannot be undone.`)) return;
       try {
-        await api(`/admin/api/script/${encodeURIComponent(filename)}`, { method: "DELETE" });
+        await api(`/admin/api/script/${encodeRelPath(filename)}`, { method: "DELETE" });
         showToast(`Deleted ${filename}`);
         loadScripts();
       } catch (err) {
@@ -168,7 +195,7 @@
   let editingFilename = null;
   async function openEditModal(filename) {
     editingFilename = filename;
-    const data = await api(`/admin/api/source/${encodeURIComponent(filename)}`);
+    const data = await api(`/admin/api/source/${encodeRelPath(filename)}`);
     document.getElementById("edit-modal-title").textContent = `Edit ${filename}`;
     document.getElementById("edit-textarea").value = data.content;
     document.getElementById("edit-modal").classList.remove("hidden");
@@ -243,6 +270,48 @@
     uploadFiles([...e.dataTransfer.files]);
   });
   fileInput?.addEventListener("change", () => uploadFiles([...fileInput.files]));
+
+  // -- grouped upload (main.js + sp1.js, sp2.js, ...) ---------------------
+  let spSlotCount = 0;
+  const spSlotsEl = document.getElementById("group-sp-slots");
+
+  function addSpSlot() {
+    spSlotCount += 1;
+    const n = spSlotCount;
+    const row = document.createElement("div");
+    row.className = "group-slot";
+    row.dataset.spSlot = String(n);
+    row.innerHTML = `<label>sp${n}.js</label><input type="file" accept=".js" class="group-sp-input"><button type="button" class="btn btn-sm" data-remove-slot>&times;</button>`;
+    row.querySelector("[data-remove-slot]")?.addEventListener("click", () => row.remove());
+    spSlotsEl?.appendChild(row);
+  }
+  document.getElementById("group-add-sp")?.addEventListener("click", addSpSlot);
+
+  document.getElementById("group-upload-btn")?.addEventListener("click", async () => {
+    const folder = document.getElementById("group-folder-input")?.value.trim();
+    const mainInput = document.getElementById("group-main-input");
+    const resultsEl = document.getElementById("upload-results");
+    if (!folder) return showToast("Enter a folder name for the group", true);
+    if (!mainInput?.files.length) return showToast("Pick a main.js file", true);
+    resultsEl.innerHTML = "";
+    const jobs = [{ label: "main.js", file: mainInput.files[0] }];
+    spSlotsEl?.querySelectorAll(".group-sp-input").forEach((input, i) => {
+      if (input.files.length) jobs.push({ label: `sp${i + 1}.js`, file: input.files[0] });
+    });
+    for (const job of jobs) {
+      const fd = new FormData();
+      fd.append("file", job.file, job.label);
+      fd.append("folder", folder);
+      try {
+        await api("/admin/api/upload", { method: "POST", body: fd });
+        resultsEl.innerHTML += `<div>&#10003; ${folder}/${job.label} uploaded</div>`;
+      } catch (err) {
+        resultsEl.innerHTML += `<div style="color:var(--danger)">&#10007; ${folder}/${job.label}: ${err.message}</div>`;
+      }
+    }
+    showToast(`Group "${folder}" uploaded`);
+    if (document.querySelector('.tab-panel[data-panel="scripts"]').classList.contains("active")) loadScripts();
+  });
 
   // -- logs ---------------------------------------------------------
   async function loadLogs(kind) {

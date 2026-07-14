@@ -28,10 +28,11 @@
   </div>
   <div id="script-grid" class="script-grid">
     {% for s in scripts %}
-    <article class="card" data-name="{{ s.name|lower }}" data-tags="{{ s.tags|join(',')|lower }}">
+    <article class="card{% if s.is_group %} card-group{% endif %}" data-name="{{ s.name|lower }}" data-tags="{{ s.tags|join(',')|lower }}" style="animation-delay: {{ loop.index0 * 35 }}ms">
       <div class="term-bar">
         <span class="dot dot-r"></span><span class="dot dot-y"></span><span class="dot dot-g"></span>
         <span class="term-path">{{ s.filename }}</span>
+        {% if s.is_group %}<span class="badge badge-group" title="{{ s.sub_count }} support script(s)">{{ s.sub_count }} SP</span>{% endif %}
       </div>
       <div class="card-head">
         <h3><a href="/scripts/{{ s.name }}">{{ s.title }}</a></h3>
@@ -49,6 +50,16 @@
         <code>{{ s.loader }}</code>
         <button class="copy-btn" data-copy="{{ s.loader }}" title="Copy loader">Copy</button>
       </div>
+      {% if s.sub_scripts %}
+      <div class="sp-row">
+        {% for sp in s.sub_scripts %}
+        <button class="sp-pill" data-sp-toggle data-raw="{{ sp.raw_url }}" data-loader="{{ sp.loader }}" data-label="{{ sp.label }}" data-lines="{{ sp.lines }}" data-size="{{ sp.size_bytes }}">
+          <span class="sp-pill-dot" aria-hidden="true"></span>{{ sp.label }}
+        </button>
+        {% endfor %}
+      </div>
+      <div class="sp-panel" hidden></div>
+      {% endif %}
       <div class="card-actions">
         <button class="btn btn-primary btn-sm copy-btn" data-copy="{{ s.loader }}">Copy Loader</button>
         <a class="btn btn-sm" href="/scripts/{{ s.name }}">View Source</a>

@@ -8,12 +8,20 @@ editing a `.js` file under `/script/` takes effect within about a second, with
 no restart and no manual database edits. The filesystem is the single source
 of truth; there is no external database.
 
+A script can be a single `name.js` file, or a **grouped** script: a folder
+`script/{name}/main.js` plus any number of `sp1.js`, `sp2.js`, ... support
+files. Grouped scripts show as one card/page (named after the folder) with
+small "SP" pills for the support files instead of appearing as separate
+top-level scripts. See `info/README.md` for the exact folder convention.
+
 ## Architecture
 - **Backend**: Python 3.11 + FastAPI (`app/main.py`), served by Uvicorn.
-- **File watcher**: `app/scripts_index.py` uses `watchdog` to observe
-  `/script/` and maintains a thread-safe in-memory index (`ScriptIndex`).
-  Every mutating admin action also calls `index.refresh_file(...)` directly
-  so there's zero lag even before the watcher event fires.
+- **File watcher**: `app/scripts_index.py` uses `watchdog` (recursive, one
+  level deep) to observe `/script/` and maintains a thread-safe in-memory
+  index (`ScriptIndex`). It detects both flat `name.js` files and grouped
+  `folder/main.js` (+ `folder/spN.js`) scripts. Every mutating admin action
+  also calls `index.refresh_file(...)`/`refresh_group(...)` directly so
+  there's zero lag even before the watcher event fires.
 - **Frontend**: server-rendered Jinja2 templates (`app/templates/`) + vanilla
   JS/CSS (`app/static/`). No frontend framework/build step.
 - **Auth**: single-file JSON user store (`data/users.json`, bcrypt-hashed

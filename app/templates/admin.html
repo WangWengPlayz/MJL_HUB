@@ -42,6 +42,23 @@
     <input type="file" id="file-input" accept=".js" multiple>
   </div>
   <div id="upload-results" class="upload-results"></div>
+
+  <div class="group-upload">
+    <h3>Grouped script (main.js + support scripts)</h3>
+    <p class="muted">For a script made of a main file plus support files &mdash; give it a folder name, pick <code>main.js</code>, then add as many <code>sp1.js</code>, <code>sp2.js</code>&hellip; as you need. They'll show up on the site as one card with small "SP" buttons.</p>
+    <div class="inline-form">
+      <input type="text" id="group-folder-input" placeholder="folder-name">
+    </div>
+    <div class="group-slot">
+      <label>main.js</label>
+      <input type="file" id="group-main-input" accept=".js">
+    </div>
+    <div id="group-sp-slots"></div>
+    <div class="admin-toolbar">
+      <button class="btn btn-sm" id="group-add-sp">+ Add support script</button>
+      <button class="btn btn-primary btn-sm" id="group-upload-btn">Upload group</button>
+    </div>
+  </div>
 </section>
 
 <section class="tab-panel" data-panel="logs">

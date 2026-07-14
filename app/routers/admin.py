@@ -13,7 +13,7 @@ from app.auth import add_user, change_password, create_session_token, delete_use
 from app.config import MAX_UPLOAD_BYTES, SCRIPTS_DIR, SESSION_COOKIE_NAME, SESSION_MAX_AGE
 from app.deps import require_admin, require_csrf
 from app.schemas import script_to_dict
-from app.scripts_index import ScriptIndex, index, is_valid_filename, safe_script_path
+from app.scripts_index import ScriptIndex, index, is_valid_filename, is_valid_relpath, safe_script_path
 from app.security import limiter
 
 router = APIRouter(prefix="/admin/api")
@@ -64,19 +64,32 @@ def _guarded(request: Request, session: dict):
 
 
 @router.post("/upload")
-async def upload(request: Request, file: UploadFile = File(...), session: dict = Depends(require_admin)):
+async def upload(
+    request: Request,
+    file: UploadFile = File(...),
+    folder: Optional[str] = Form(default=None),
+    session: dict = Depends(require_admin),
+):
     _guarded(request, session)
     filename = file.filename or ""
-    if not is_valid_filename(filename):
-        raise HTTPException(status_code=400, detail="Invalid filename. Must be a plain name.js file.")
+    # A `folder` value turns this into a grouped-script upload: the file must
+    # be main.js or spN.js and lands at SCRIPTS_DIR/folder/filename.
+    relpath = f"{folder}/{filename}" if folder else filename
+    if not is_valid_relpath(relpath):
+        raise HTTPException(
+            status_code=400,
+            detail="Invalid filename. Must be a plain name.js file, or main.js/sp{n}.js inside a folder.",
+        )
     data = await file.read()
     if len(data) > MAX_UPLOAD_BYTES:
         raise HTTPException(status_code=413, detail="File too large")
-    path = SCRIPTS_DIR / filename
+    path = SCRIPTS_DIR / relpath
+    path.parent.mkdir(parents=True, exist_ok=True)
     path.write_bytes(data)
-    index.refresh_file(filename)
-    log_activity("upload", actor=session.get("u", "?"), detail=filename, ip=_client_ip(request))
-    entry = index.get(path.stem)
+    index.refresh_file(relpath)
+    log_activity("upload", actor=session.get("u", "?"), detail=relpath, ip=_client_ip(request))
+    name = folder if folder else path.stem
+    entry = index.get(name)
     return {"ok": True, "script": script_to_dict(entry, request) if entry else None}
 
 
@@ -85,22 +98,27 @@ async def bulk_upload(request: Request, files: list[UploadFile] = File(...), ses
     _guarded(request, session)
     results = []
     for file in files:
+        # webkitdirectory uploads from the browser send the relative path in
+        # `filename` (e.g. "foldername/main.js") when a whole folder is
+        # dropped/selected, so accept both flat and grouped shapes here.
         filename = file.filename or ""
-        if not is_valid_filename(filename):
+        if not is_valid_relpath(filename):
             results.append({"filename": filename, "ok": False, "error": "invalid filename"})
             continue
         data = await file.read()
         if len(data) > MAX_UPLOAD_BYTES:
             results.append({"filename": filename, "ok": False, "error": "too large"})
             continue
-        (SCRIPTS_DIR / filename).write_bytes(data)
+        path = SCRIPTS_DIR / filename
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_bytes(data)
         index.refresh_file(filename)
         results.append({"filename": filename, "ok": True})
     log_activity("bulk_upload", actor=session.get("u", "?"), detail=f"{len(results)} files", ip=_client_ip(request))
     return {"results": results}
 
 
-@router.delete("/script/{filename}")
+@router.delete("/script/{filename:path}")
 def delete_script(request: Request, filename: str, session: dict = Depends(require_admin)):
     _guarded(request, session)
     path = safe_script_path(filename)
@@ -110,6 +128,11 @@ def delete_script(request: Request, filename: str, session: dict = Depends(requi
         raise HTTPException(status_code=404, detail="Not found")
     path.unlink()
     index.refresh_file(filename)
+    # Deleting a group's main.js takes the whole folder with it.
+    if "/" in filename and filename.lower().endswith("/main.js"):
+        folder = filename.rsplit("/", 1)[0]
+        shutil.rmtree(SCRIPTS_DIR / folder, ignore_errors=True)
+        index.refresh_group(folder)
     log_activity("delete", actor=session.get("u", "?"), detail=filename, ip=_client_ip(request))
     return {"ok": True}
 
@@ -124,7 +147,12 @@ def bulk_delete(request: Request, filenames: list[str], session: dict = Depends(
             results.append({"filename": filename, "ok": False})
             continue
         path.unlink()
-        index.refresh_file(filename)
+        if "/" in filename and filename.lower().endswith("/main.js"):
+            folder = filename.rsplit("/", 1)[0]
+            shutil.rmtree(SCRIPTS_DIR / folder, ignore_errors=True)
+            index.refresh_group(folder)
+        else:
+            index.refresh_file(filename)
         results.append({"filename": filename, "ok": True})
     log_activity("bulk_delete", actor=session.get("u", "?"), detail=f"{len(results)} files", ip=_client_ip(request))
     return {"results": results}
@@ -185,7 +213,7 @@ def edit_source(request: Request, filename: str = Form(...), content: str = Form
     return {"ok": True, "script": script_to_dict(entry, request) if entry else None}
 
 
-@router.get("/source/{filename}")
+@router.get("/source/{filename:path}")
 def get_source(filename: str, session: dict = Depends(require_admin)):
     path = safe_script_path(filename)
     if path is None or not path.exists():

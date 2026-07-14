@@ -36,6 +36,19 @@
     <button class="copy-btn" data-copy="{{ script.loader }}">Copy</button>
   </div>
 
+  {% if script.sub_scripts %}
+  <div class="file-tabs" id="file-tabs">
+    <button class="file-tab active" data-file-index="0">
+      <span class="file-tab-dot"></span>{{ script.filename.split('/')[-1] }} <span class="file-tab-tag">main</span>
+    </button>
+    {% for sp in script.sub_scripts %}
+    <button class="file-tab" data-file-index="{{ loop.index }}">
+      <span class="file-tab-dot"></span>{{ sp.label }}.js <span class="file-tab-tag file-tab-tag-sp">support</span>
+    </button>
+    {% endfor %}
+  </div>
+  {% endif %}
+
   <div class="viewer-toolbar">
     <input id="source-search" type="search" placeholder="Search in source...">
     <label class="checkbox"><input type="checkbox" id="wrap-toggle"> Word wrap</label>
@@ -56,6 +69,15 @@
 </section>
 {% endblock %}
 {% block scripts %}
-<script>window.__SCRIPT__ = {{ script.filename|tojson }}; window.__RAW_URL__ = {{ script.raw_url|tojson }};</script>
+<script>
+window.__SCRIPT__ = {{ script.filename|tojson }};
+window.__RAW_URL__ = {{ script.raw_url|tojson }};
+window.__FILES__ = [
+  {filename: {{ script.filename|tojson }}, raw_url: {{ script.raw_url|tojson }}, loader: {{ script.loader|tojson }}, label: "main"},
+  {% for sp in script.sub_scripts %}
+  {filename: {{ sp.filename|tojson }}, raw_url: {{ sp.raw_url|tojson }}, loader: {{ sp.loader|tojson }}, label: {{ sp.label|tojson }}},
+  {% endfor %}
+];
+</script>
 <script src="/static/js/viewer.js"></script>
 {% endblock %}

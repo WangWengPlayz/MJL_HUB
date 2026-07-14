@@ -25,6 +25,21 @@ def loader_snippet(name: str, filename: str, request=None) -> str:
     return f'loadstring(game:HttpGet("{url}"))()'
 
 
+def sub_script_to_dict(entry, folder: str, request=None) -> dict:
+    root = base_url(request)
+    return {
+        "label": entry.label,
+        "order": entry.order,
+        "filename": entry.filename,
+        "size_bytes": entry.size,
+        "checksum": entry.checksum,
+        "lines": entry.lines,
+        "downloads": entry.downloads,
+        "raw_url": f"{root}/script/{entry.filename}",
+        "loader": loader_snippet(folder, entry.filename, request),
+    }
+
+
 def script_to_dict(entry: ScriptEntry, request=None) -> dict:
     root = base_url(request)
     info = get_info(entry.name, fallback_updated_at=entry.updated_at)
@@ -49,4 +64,8 @@ def script_to_dict(entry: ScriptEntry, request=None) -> dict:
         "creator": info["creator"],
         "credits": info["credits"],
         "last_updated": info["lastUpdated"],
+        "is_group": entry.is_group,
+        "folder": entry.folder,
+        "sub_scripts": [sub_script_to_dict(s, entry.name, request) for s in entry.sub_scripts],
+        "sub_count": len(entry.sub_scripts),
     }

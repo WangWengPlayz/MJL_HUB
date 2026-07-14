@@ -9,34 +9,71 @@
   const viewer = document.getElementById("viewer");
   const wrapToggle = document.getElementById("wrap-toggle");
   const searchInput = document.getElementById("source-search");
+  const files = Array.isArray(window.__FILES__) && window.__FILES__.length ? window.__FILES__ : [
+    { filename: window.__SCRIPT__, raw_url: window.__RAW_URL__, label: "main" },
+  ];
+  let activeIndex = 0;
   let sourceText = "";
   let loadFailed = false;
+  let largeFileNotice = null;
 
   const MAX_HIGHLIGHT_CHARS = 120000; // total file size above which we skip hljs entirely
   const MAX_LINE_LENGTH = 4000; // any single line longer than this skips hljs (minified/obfuscated code)
+  let tooLargeForHighlight = false;
 
-  try {
-    // Same-origin relative fetch -- avoids CORS entirely regardless of what
-    // domain/proxy is serving the page (dev preview, custom domain, etc).
-    const res = await fetch(`/script/${encodeURIComponent(window.__SCRIPT__)}`);
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    sourceText = await res.text();
-  } catch (e) {
-    sourceText = "// failed to load source";
-    loadFailed = true;
+  async function loadFile(index) {
+    activeIndex = index;
+    const file = files[index];
+    window.__RAW_URL__ = file.raw_url;
+    try {
+      // Same-origin relative fetch -- avoids CORS entirely regardless of what
+      // domain/proxy is serving the page (dev preview, custom domain, etc).
+      // We deliberately build this from `filename`, not the absolute
+      // `raw_url` (which can point at a different public base URL/domain).
+      const res = await fetch(`/script/${file.filename.split("/").map(encodeURIComponent).join("/")}`);
+      if (!res.ok) throw new Error(`HTTP ${res.status}`);
+      sourceText = await res.text();
+      loadFailed = false;
+    } catch (e) {
+      sourceText = "// failed to load source";
+      loadFailed = true;
+    }
+
+    const longestLine = loadFailed ? 0 : Math.max(0, ...sourceText.split("\n").map((l) => l.length));
+    tooLargeForHighlight = sourceText.length > MAX_HIGHLIGHT_CHARS || longestLine > MAX_LINE_LENGTH;
+
+    if (largeFileNotice) {
+      largeFileNotice.remove();
+      largeFileNotice = null;
+    }
+    if (tooLargeForHighlight && !loadFailed) {
+      largeFileNotice = document.createElement("p");
+      largeFileNotice.className = "muted";
+      largeFileNotice.textContent = "This file is large or minified (very long lines) — syntax highlighting is disabled and word wrap is on to keep the page responsive.";
+      viewer.parentElement.insertBefore(largeFileNotice, viewer);
+      if (wrapToggle) wrapToggle.checked = true;
+      viewer.classList.add("wrap");
+    }
+
+    const loaderCode = document.getElementById("loader-code");
+    if (loaderCode && file.loader) {
+      loaderCode.textContent = file.loader;
+      const copyBtn = loaderCode.parentElement?.querySelector(".copy-btn");
+      if (copyBtn) copyBtn.setAttribute("data-copy", file.loader);
+    }
+
+    render();
   }
 
-  const longestLine = loadFailed ? 0 : Math.max(0, ...sourceText.split("\n").map((l) => l.length));
-  const tooLargeForHighlight = sourceText.length > MAX_HIGHLIGHT_CHARS || longestLine > MAX_LINE_LENGTH;
-
-  if (tooLargeForHighlight && !loadFailed) {
-    const notice = document.createElement("p");
-    notice.className = "muted";
-    notice.textContent = "This file is large or minified (very long lines) — syntax highlighting is disabled and word wrap is on to keep the page responsive.";
-    viewer.parentElement.insertBefore(notice, viewer);
-    if (wrapToggle) wrapToggle.checked = true;
-    viewer.classList.add("wrap");
-  }
+  document.querySelectorAll(".file-tab").forEach((tab) => {
+    tab.addEventListener("click", async () => {
+      document.querySelectorAll(".file-tab").forEach((t) => t.classList.remove("active"));
+      tab.classList.add("active");
+      viewer.classList.add("file-switching");
+      await loadFile(parseInt(tab.dataset.fileIndex, 10));
+      requestAnimationFrame(() => viewer.classList.remove("file-switching"));
+    });
+  });
 
   function escapeHtml(text) {
     return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
@@ -81,7 +118,7 @@
     }
   }
 
-  render();
+  await loadFile(0);
 
   let searchDebounce;
   searchInput?.addEventListener("input", (e) => {

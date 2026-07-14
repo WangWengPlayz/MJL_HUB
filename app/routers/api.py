@@ -87,21 +87,23 @@ def api_status(request: Request):
     }
 
 
-@router.get("/script/{filename}")
+@router.get("/script/{filepath:path}")
 @limiter.limit("120/minute")
-def raw_script(request: Request, filename: str):
+def raw_script(request: Request, filepath: str):
     """Serve the raw, untouched contents of a script file.
 
-    This is the only route that reads directly from SCRIPTS_DIR by filename,
-    so it is the most important path-traversal choke point in the app.
+    Supports both flat scripts (`name.js`) and grouped scripts
+    (`folder/main.js`, `folder/sp1.js`, ...). This is the only route that
+    reads directly from SCRIPTS_DIR by path, so it is the most important
+    path-traversal choke point in the app.
     """
-    path = safe_script_path(filename)
+    path = safe_script_path(filepath)
     if path is None:
-        log_security("path_traversal_attempt", detail=filename, ip=request.client.host if request.client else None, path=str(request.url))
+        log_security("path_traversal_attempt", detail=filepath, ip=request.client.host if request.client else None, path=str(request.url))
         return PlainTextResponse("Invalid filename", status_code=400)
     if not path.exists() or not path.is_file():
         return PlainTextResponse("Not found", status_code=404)
-    index.bump(path.stem, "downloads")
+    index.bump_download_for(filepath)
     # Serve inline as plain text (like any other API/raw output) -- no
     # Content-Disposition: attachment, so the browser displays it instead of
     # triggering a file download.
