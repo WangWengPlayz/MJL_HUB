@@ -1,8 +1,8 @@
 {
   "title": "+1 Magic Evolution",
-  "description": "",
-  "version": "1.0.0",
-  "creator": "",
-  "credits": "",
+  "description": "Auto farmer for +1 Magic Evolution. Features auto click, infinite wins, auto rebirth with zone selection, AFK mode, and dungeon auto-detection.",
+  "version": "2.0.0",
+  "creator": "MJL",
+  "credits": "MJL",
   "lastUpdated": "2026-07-14"
 }
