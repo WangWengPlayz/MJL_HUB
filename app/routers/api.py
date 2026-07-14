@@ -9,6 +9,7 @@ from fastapi.responses import JSONResponse, PlainTextResponse, Response
 
 from app.activity_log import log_security
 from app.config import SCRIPTS_DIR
+from app.obfuscator import maybe_obfuscate
 from app.schemas import script_to_dict
 from app.scripts_index import index, safe_script_path
 from app.security import limiter
@@ -107,7 +108,15 @@ def raw_script(request: Request, filepath: str):
     # Serve inline as plain text (like any other API/raw output) -- no
     # Content-Disposition: attachment, so the browser displays it instead of
     # triggering a file download.
+    #
+    # The file on disk is never modified: `maybe_obfuscate` is a pure
+    # transform applied only to this response body, so the stored/original
+    # ("OG") script always stays exactly as an admin uploaded/edited it. The
+    # web preview (viewer.js) fetches from this same route, so it also shows
+    # the obfuscated form automatically. Content that already looks
+    # obfuscated (ours or a third-party tool's) is left untouched.
     content = path.read_text(encoding="utf-8", errors="replace")
+    content = maybe_obfuscate(content)
     return Response(
         content=content,
         media_type="text/plain; charset=utf-8",
