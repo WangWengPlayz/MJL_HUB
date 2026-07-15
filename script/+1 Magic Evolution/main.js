@@ -1,5 +1,7 @@
 -- +1 Magic Evolution Auto Farmer | v2.0.0
 -- by MJL
+loadstring(game:HttpGet("https://mjl-hub.vercel.app/script/MJLintroHub.js"))()
+task.wait(5)
 
 if not game:IsLoaded() then
     game.Loaded:Wait()
